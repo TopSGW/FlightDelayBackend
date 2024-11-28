@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Airport;
 use App\Transformers\AirportTransformer;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AirportsController extends ApiController
@@ -25,20 +25,23 @@ class AirportsController extends ApiController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $municipality = Input::get('municipality');
+        $municipality = $request->get('municipality');
 
-        if (strlen(trim($municipality)) === 0) {
+        if (empty(trim($municipality))) {
             return $this->setStatusCode(Response::HTTP_BAD_REQUEST)
-                        ->respondWithError('Please provide the airport municipality or a part of it for filtering the airports.');
+                       ->respondWithError('Please provide the airport municipality or a part of it for filtering the airports.');
         }
 
-        $airports = Airport::where('municipality', 'like', "%$municipality%")->orderBy('municipality')->get();
+        $airports = Airport::where('municipality', 'like', "%$municipality%")
+                          ->orderBy('municipality')
+                          ->get();
 
-        if(count($airports->toArray()) === 0) {
+        if ($airports->isEmpty()) {
             return $this->respondNotFound("No airports found for the given municipality: $municipality.");
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Airline;
 use App\FlightRoutes;
 use App\Transformers\AirlineTransformer;
+use Illuminate\Http\Response;
 
 class AirlinesForFlightRouteController extends ApiController
 {
@@ -15,6 +16,7 @@ class AirlinesForFlightRouteController extends ApiController
 
     /**
      * AirlinesForFlightRouteController constructor.
+     * 
      * @param AirlineTransformer $airlineTransformer
      */
     public function __construct(AirlineTransformer $airlineTransformer)
@@ -23,19 +25,21 @@ class AirlinesForFlightRouteController extends ApiController
     }
 
     /**
-     * @param $departureAirportId
-     * @param $destinationAirportId
-     * @return mixed
+     * Invoke the controller method.
+     *
+     * @param int $departureAirportId
+     * @param int $destinationAirportId
+     * @return \Illuminate\Http\Response
      */
     public function __invoke(int $departureAirportId, int $destinationAirportId)
     {
-        $flightRoutes = FlightRoutes::where('source_airport_id', '=', $departureAirportId)
-                                    ->where('destination_airport_id', '=', $destinationAirportId)
-                                    ->pluck('airline_id');
+        $flightRoutes = FlightRoutes::where('source_airport_id', $departureAirportId)
+                                   ->where('destination_airport_id', $destinationAirportId)
+                                   ->pluck('airline_id');
 
         $airlines = Airline::whereIn('id', $flightRoutes)->get();
 
-        if (count($airlines->toArray()) === 0) {
+        if ($airlines->isEmpty()) {
             return $this->respondNotFound('No airline found for the criteria.');
         }
 
