@@ -30,6 +30,10 @@ Route::group(['prefix' => 'v1'], function () {
         'AirlinesForFlightRouteController');
 
 
+    Route::get('', function (Request $request) {
+        return "hello world";
+    });
+
     Route::get('user', function (Request $request) {
         return $request->user();
     });
